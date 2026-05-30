@@ -48,7 +48,13 @@ gracefully — the human audit trail always shows what was wrapped.
 
 ## Install
 
-### 1. Build the Docker image
+### 1. Pull the Docker image
+
+```bash
+docker pull ghcr.io/sharkyger/mcp-safe-fetch:latest
+```
+
+Or build from source:
 
 ```bash
 git clone https://github.com/sharkyger/mcp-safe-fetch.git
@@ -65,7 +71,7 @@ Edit `~/Library/Application Support/Claude/claude_desktop_config.json`:
   "mcpServers": {
     "safe-fetch": {
       "command": "docker",
-      "args": ["run", "--rm", "-i", "mcp-safe-fetch"]
+      "args": ["run", "--rm", "-i", "ghcr.io/sharkyger/mcp-safe-fetch:latest"]
     }
   }
 }
