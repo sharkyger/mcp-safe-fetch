@@ -1,0 +1,20 @@
+{
+  "name": "mcp-safe-fetch",
+  "version": "1.0.0",
+  "description": "MCP server that wraps all fetched web content in UNTRUSTED-WEB tags to prevent indirect prompt injection",
+  "type": "module",
+  "main": "dist/index.js",
+  "scripts": {
+    "build": "tsc",
+    "start": "node dist/index.js",
+    "docker:build": "docker build -t mcp-safe-fetch .",
+    "docker:run": "docker run --rm -i mcp-safe-fetch"
+  },
+  "dependencies": {
+    "@modelcontextprotocol/sdk": "1.29.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "typescript": "6.0.3"
+  }
+}
