@@ -1,0 +1,56 @@
+mcp-safe-fetch
+==============
+
+This product includes software developed by third parties:
+
+Layer-2 sanitizer (chain attribution)
+-------------------------------------
+The Python sanitizer at `src/mcp_safe_fetch/sanitizer.py` is vendored
+from the companion safe-fetch project, which in turn ported the logic
+from the original mcp-safe-fetch project by Tim Stark.
+
+Direct upstream (vendored from):
+  Project:  safe-fetch
+  Source:   https://github.com/sharkyger/safe-fetch
+  Path:     src/safe_fetch/sanitizer.py
+  License:  MIT
+  Copyright (c) 2026 Sharky
+
+Original upstream (logic origin):
+  Project:  mcp-safe-fetch (timstarkk)
+  Source:   https://github.com/timstarkk/mcp-safe-fetch
+  Commit:   e82724c9b9535aff6c2cc102aa17abd16b726b96
+  License:  MIT
+  Copyright (c) 2025 Tim Stark
+
+Both upstream licenses are MIT and are preserved below.
+
+Refresh procedure: when safe-fetch's sanitizer.py changes, re-vendor
+into this repo with `cp ../safe-fetch/src/safe_fetch/sanitizer.py
+src/mcp_safe_fetch/sanitizer.py` (or equivalent) and re-attribute via
+the header comment. When timstarkk's upstream changes, evaluate
+whether to port through safe-fetch first or directly into this repo.
+
+---
+
+MIT License
+
+Copyright (c) 2025 Tim Stark
+
+Permission is hereby granted, free of charge, to any person obtaining a copy
+of this software and associated documentation files (the "Software"), to deal
+in the Software without restriction, including without limitation the rights
+to use, copy, modify, merge, publish, distribute, sublicense, and/or sell
+copies of the Software, and to permit persons to whom the Software is
+furnished to do so, subject to the following conditions:
+
+The above copyright notice and this permission notice shall be included in all
+copies or substantial portions of the Software.
+
+THE SOFTWARE IS PROVIDED "AS IS", WITHOUT WARRANTY OF ANY KIND, EXPRESS OR
+IMPLIED, INCLUDING BUT NOT LIMITED TO THE WARRANTIES OF MERCHANTABILITY,
+FITNESS FOR A PARTICULAR PURPOSE AND NONINFRINGEMENT. IN NO EVENT SHALL THE
+AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
+LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
+OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
+SOFTWARE.

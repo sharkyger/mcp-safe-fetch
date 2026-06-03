@@ -1,0 +1,102 @@
+[build-system]
+requires = ["setuptools>=68", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "mcp-safe-fetch"
+version = "0.1.0"
+description = "MCP server providing a Layer-2 sanitized fetch tool for Claude Desktop and any MCP client"
+readme = "README.md"
+license = { file = "LICENSE" }
+requires-python = ">=3.10"
+authors = [
+    { name = "Sharky", email = "51028592+sharkyger@users.noreply.github.com" },
+]
+keywords = ["mcp", "prompt-injection", "llm-security", "claude-desktop", "ai-security", "sanitizer"]
+classifiers = [
+    "Development Status :: 3 - Alpha",
+    "Environment :: Console",
+    "Intended Audience :: Developers",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: MacOS",
+    "Operating System :: POSIX :: Linux",
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "Topic :: Security",
+    "Topic :: Software Development :: Libraries :: Python Modules",
+]
+dependencies = [
+    # mcp 1.27.2 still inside the 14-day freshness hold (released
+    # 2026-05-29); pin to 1.27.1 (2026-05-08, past hold, CVE-clean).
+    # Dependabot will bump to 1.27.2 around 2026-06-12 when it ages
+    # past the hold. See feedback-brew-formula-sha-source for the
+    # broader fleet pattern of "admissible-not-latest" pins.
+    "mcp==1.27.1",
+    # Vendored sanitizer requires bs4 + lxml. Pins match safe-fetch's
+    # so the sanitizer behaves byte-identically across the fleet.
+    # lxml 6.1.1 closes PYSEC-2026-87 (5.x has no back-port).
+    "beautifulsoup4==4.14.3",
+    "lxml==6.1.1",
+]
+
+[project.urls]
+Homepage = "https://github.com/sharkyger/mcp-safe-fetch"
+Issues = "https://github.com/sharkyger/mcp-safe-fetch"
+Source = "https://github.com/sharkyger/mcp-safe-fetch"
+"Companion: safe-fetch" = "https://github.com/sharkyger/safe-fetch"
+
+[project.scripts]
+mcp-safe-fetch = "mcp_safe_fetch.server:run"
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=8",
+    "pytest-asyncio>=0.23",
+    "ruff>=0.6",
+    "mypy>=1.10",
+    "bandit>=1.7",
+    "pip-audit>=2.7",
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+pythonpath = ["src"]
+asyncio_mode = "auto"
+
+[tool.ruff]
+target-version = "py310"
+line-length = 120
+src = ["src"]
+
+[tool.ruff.lint]
+select = ["E", "W", "F", "I", "S", "B", "UP", "SIM", "PTH"]
+ignore = [
+    "S603",  # subprocess args reviewed
+    "S607",  # partial paths intentional
+]
+
+[tool.ruff.lint.per-file-ignores]
+"tests/*" = ["S101"]   # assert is fine in tests
+
+[tool.ruff.format]
+quote-style = "double"
+
+[tool.mypy]
+python_version = "3.10"
+files = ["src/mcp_safe_fetch"]
+check_untyped_defs = true
+warn_unreachable = true
+warn_redundant_casts = true
+warn_unused_ignores = true
+no_implicit_optional = true
+strict_equality = true
+ignore_missing_imports = true
+
+[tool.bandit]
+skips = ["B101"]
+exclude_dirs = ["tests"]

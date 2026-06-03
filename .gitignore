@@ -1,2 +1,20 @@
-node_modules/
+__pycache__/
+*.py[cod]
+*.egg-info/
+*.egg
+.pytest_cache/
+.ruff_cache/
+.mypy_cache/
+build/
 dist/
+.venv/
+venv/
+.coverage
+htmlcov/
+.DS_Store
+node_modules/
+
+# Local code-review artifacts (Mistral Vibe / CodeRabbit / subagent) — never commit
+.codereview/
+# Local-only working notes / security handoffs — never commit
+*.local.md

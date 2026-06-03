@@ -1,0 +1,76 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.10", "3.11", "3.12"]
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: ${{ matrix.python-version }}
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: Lint
+        run: ruff check
+      - name: Format check
+        run: ruff format --check
+      - name: Test
+        run: pytest -v
+
+  static-analysis:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - uses: actions/setup-python@a309ff8b426b58ec0e2a45f0f869d46889d02405  # v6.2.0
+        with:
+          python-version: "3.12"
+      - name: Install
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e ".[dev]"
+      - name: mypy
+        run: mypy
+      - name: bandit
+        run: bandit -r src/ -ll
+      - name: pip-audit
+        run: pip-audit --skip-editable
+
+  docker-build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@de0fac2e4500dabe0009e67214ff5f5447ce83dd  # v6.0.2
+        with:
+          persist-credentials: false
+      - name: Build mcp-safe-fetch image
+        run: docker build -t mcp-safe-fetch:ci .
+      - name: Smoke check the entrypoint
+        # The MCP server speaks JSON-RPC on stdio; sending an empty
+        # stdin causes a clean shutdown. The check confirms the image
+        # at least starts the Python interpreter and the package
+        # imports cleanly.
+        run: |
+          echo "" | docker run --rm -i mcp-safe-fetch:ci 2>&1 | head -5 || true
+          docker run --rm --entrypoint python3 mcp-safe-fetch:ci -c "import mcp_safe_fetch; print(mcp_safe_fetch.__version__)" | grep -q "0.1.0"
