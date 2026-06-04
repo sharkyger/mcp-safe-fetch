@@ -62,13 +62,16 @@ Four-step filter:
 
 ## Planned phase scope
 
-- **v0.1.0** (this release) — `fetch_url` tool with the safe-fetch
-  Layer-2 sanitizer, SSRF block, redirect re-validation, `<UNTRUSTED-WEB>`
-  wrap.
-- **v0.2.0** — proxy mode: spawn another MCP server as a child
+- **v0.1.0** — `fetch_url` tool with the safe-fetch Layer-2 sanitizer,
+  SSRF block, redirect re-validation, `<UNTRUSTED-WEB>` wrap.
+- **v0.2.0** (this release) — app-layer resolve-then-pin SSRF
+  (IP-literal + envelope-breakout hardening, DNS-rebinding closed),
+  pull-based GHCR distribution, and the macOS install guides
+  (en/de/fr). The honest first published release.
+- **v0.3.0** — proxy mode: spawn another MCP server as a child
   process, sanitize all responses flowing back to the model. Same
   wrap tag, same model rule, same install pattern.
-- **v0.3.0+** — TBD; deferred until v0.2.0 ships and user feedback
+- **v0.4.0+** — TBD; deferred until proxy mode ships and user feedback
   surfaces real needs. Likely candidates: configurable output cap,
   configurable timeout, proxy-everything-by-default ergonomics.
 
