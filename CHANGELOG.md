@@ -32,6 +32,12 @@ stable is announced. `v1.0` is reserved.
 
 ### Changed
 
+- **`System requirements` section** added up front in the README (so
+  prerequisites are visible without opening the install guide), and the
+  install guides' prerequisites heading renamed from "What you'll need"
+  to the standard `System requirements` (localized: `Systemvoraussetzungen`,
+  `Configuration requise`). The install guides' Terminal step now also
+  documents the Launchpad route, not just Spotlight.
 - **README right-sized.** `Supported: macOS only` banner at the very
   top; the long internal "Why this exists" anecdote trimmed to a short
   generic threat note; usage-before-install ordering; the GHCR pull is

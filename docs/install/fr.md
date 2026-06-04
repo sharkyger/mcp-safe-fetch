@@ -22,7 +22,7 @@ téléchargement de Docker Desktop).
 
 ---
 
-## Ce qu'il vous faut
+## Configuration requise
 
 1. Un Mac (macOS 12 ou plus récent recommandé).
 2. **Claude Desktop** — si vous ne l'avez pas, téléchargez-le sur
@@ -69,8 +69,11 @@ l'outil de récupération dans Claude.
 
 ## Étape 3 — Télécharger l'image mcp-safe-fetch
 
-1. Ouvrez l'application **Terminal** (Spotlight : `⌘ Espace`, tapez
-   « Terminal », touche Entrée).
+1. Ouvrez l'application **Terminal**. Deux méthodes simples :
+   - **Spotlight :** appuyez sur `⌘ Espace`, tapez « Terminal », touche
+     Entrée.
+   - **Launchpad :** ouvrez le Launchpad (Apps) depuis le Dock, tapez
+     « Terminal » dans la barre de recherche, puis cliquez dessus.
 2. Copiez cette ligne, collez-la dans le Terminal et appuyez sur
    **Entrée** :
 
