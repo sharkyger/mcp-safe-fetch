@@ -7,6 +7,41 @@ stable is announced. `v1.0` is reserved.
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-06-04
+
+### Theme
+
+**Defense-in-depth hardening — vendored sanitizer refresh.** Re-syncs
+the vendored sanitizer with safe-fetch v0.2.1, which moves the
+`<UNTRUSTED-WEB url="...">` envelope's URL output-encoding into the
+sanitizer's wrap layer. This restores the byte-identical vendoring
+invariant and lets the server retire the temporary v0.2.0 input-layer
+mitigation. No behaviour change for well-formed input.
+
+### Changed
+
+- **Re-vendored `sanitizer.py` byte-identical from safe-fetch v0.2.1.**
+  Pulls in upstream output-encoding hardening for the envelope header
+  (defense-in-depth) and restores the byte-identical vendoring
+  invariant with safe-fetch. Sanitizer changes live upstream and are
+  re-vendored, never patched in this repo.
+
+### Removed
+
+- **Server-layer URL character rejection (the v0.2.0 stopgap).** v0.2.0
+  rejected URLs containing `<`, `>`, `"`, spaces, or control characters
+  at the `_validate_url` input layer as a temporary mitigation while the
+  vendored sanitizer could not yet carry the fix. The refreshed
+  sanitizer now output-encodes the URL in the envelope wrap, so the
+  input-layer rejection is redundant and over-strict (it rejected URLs
+  the encoder handles safely). Removed in the same release that vendors
+  the wrap-layer encoding, so protection is continuous.
+
+### Added
+
+- **`.github/FUNDING.yml`** — GitHub Sponsors funding link
+  (`github: sharkyger`).
+
 ## [0.2.0] - 2026-06-04
 
 ### Theme
