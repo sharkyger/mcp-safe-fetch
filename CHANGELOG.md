@@ -30,6 +30,20 @@ stable is announced. `v1.0` is reserved.
   a drift stamp pointing back to `en.md`. Linked from the README via a
   language table.
 
+### Fixed
+
+- **Envelope-breakout via the URL attribute (full-codebase review
+  finding).** The fetched URL is interpolated into the
+  `<UNTRUSTED-WEB url="...">` wrapper; a crafted URL containing a raw
+  `"`, `<`, or `>` could close the envelope attribute and inject a
+  literal `</UNTRUSTED-WEB>` to smuggle "trusted" content outside the
+  wrap. `_validate_url` now rejects URLs containing `<`, `>`, `"`,
+  spaces, or control characters (none are valid unencoded in an http(s)
+  URL). Closed at the server's input-validation layer so the vendored
+  sanitizer stays byte-identical with safe-fetch; the deeper
+  `_wrap_untrusted` attribute-escaping belongs upstream in safe-fetch
+  and is flagged there.
+
 ### Changed
 
 - **README right-sized.** `Supported: macOS only` banner at the very

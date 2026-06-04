@@ -128,6 +128,16 @@ def _validate_url(url: str) -> str | None:
         return "private and internal hosts are blocked"
     if _is_ip_literal(p.hostname):
         return "direct IP-literal URLs are not allowed; use a hostname"
+    # Envelope safety: the URL is interpolated into the
+    # <UNTRUSTED-WEB url="..."> wrapper. A valid http(s) URL never
+    # contains raw <, >, ", spaces, or control chars (they must be
+    # percent-encoded), so reject them — otherwise a crafted URL could
+    # close the envelope attribute or inject a literal </UNTRUSTED-WEB>
+    # and break out of the wrap.
+    if any(c in url for c in '<>"'):
+        return "URL must not contain '<', '>', or '\"'; percent-encode them"
+    if any(ord(c) <= 0x20 or ord(c) == 0x7F for c in url):
+        return "URL must not contain spaces or control characters; percent-encode them"
     try:
         _ = p.port  # property raises ValueError on a malformed/out-of-range port
     except ValueError:
