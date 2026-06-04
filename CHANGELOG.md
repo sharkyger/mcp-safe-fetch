@@ -5,6 +5,24 @@ Versioning per [SemVer 2.0](https://semver.org/), with the fleet rule
 that `v0.x.y` means "pre-stable" until the first reliably-tested
 stable is announced. `v1.0` is reserved.
 
+## [Unreleased]
+
+### Added
+
+- **GHCR publish workflow** restored (`.github/workflows/docker.yml`) —
+  multi-platform (amd64 + arm64) build pushed to
+  `ghcr.io/sharkyger/mcp-safe-fetch` on `main` and on `v*` tags;
+  pull requests get a build-only run (no push). The workflow had been
+  dropped during the Python rewrite, leaving no published image; this
+  re-enables the pull-based install path. Actions are SHA-pinned.
+- **`CLAUDE.md`** — fleet-rules header + what-this-repo-does, so a
+  parallel session inherits the identity / versioning / container-only
+  / never-test-on-host rules.
+- **`.coderabbit.yaml`** — assertive review profile with
+  security-critical path instructions for the sanitizer, the MCP
+  server's SSRF contract, and the Dockerfile. Completes the tooling
+  floor (ruff/mypy/bandit/pip-audit/CI/NOTICE were already present).
+
 ## [0.1.0] - 2026-05-31
 
 ### Theme

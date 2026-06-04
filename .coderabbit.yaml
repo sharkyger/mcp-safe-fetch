@@ -1,0 +1,49 @@
+# CodeRabbit configuration — assertive profile per fleet floor.
+# Docs: https://docs.coderabbit.ai/guides/configure-coderabbit
+
+language: en-US
+
+reviews:
+  profile: assertive
+  request_changes_workflow: false
+  high_level_summary: true
+  poem: false
+  review_status: true
+  collapse_walkthrough: false
+
+  auto_review:
+    enabled: true
+    drafts: false
+    base_branches: [main]
+
+  path_filters:
+    - "!.codereview/**"
+    - "!*.local.md"
+
+  path_instructions:
+    - path: "src/mcp_safe_fetch/sanitizer.py"
+      instructions: |
+        The Layer-2 prompt-injection sanitizer, vendored from safe-fetch.
+        Treat any weakening of a strip/escape pass as a security-critical
+        finding. The envelope-breakout pass (_escape_untrusted_tags) MUST
+        run LAST, after every other strip, so nothing can re-introduce a
+        literal <UNTRUSTED-*> sequence. A change that lets a literal
+        </UNTRUSTED-WEB> survive into the wrapped body is a fail-open
+        regression and must block.
+    - path: "src/mcp_safe_fetch/server.py"
+      instructions: |
+        The MCP server. _validate_url + the redirect handler are the
+        app-layer SSRF contract: http/https only, private/internal hosts
+        blocked, every redirect hop re-validated. Treat a missing or
+        relaxed check, or any path that fetches before validation, as a
+        security regression. Errors must surface as clean text to the
+        model, never crash the stdio loop.
+    - path: "Dockerfile"
+      instructions: |
+        The image is the SSRF boundary and the only supported run mode.
+        Treat removal of the non-root user, the digest-pinned base image,
+        or (once added) the egress-hardening entrypoint as a
+        security-critical finding.
+
+chat:
+  auto_reply: false
