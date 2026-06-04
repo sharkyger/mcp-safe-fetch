@@ -31,11 +31,13 @@ stable is announced. `v1.0` is reserved.
   decimal/octal/hex/IPv4-mapped) and non-http(s) schemes; resolves the
   hostname and refuses if **any** resolved address is private/internal
   (RFC1918, loopback, link-local incl. `169.254.169.254`, CGNAT, IPv6
-  ULA/link-local); **pins** the connection to the validated IP so the
+  ULA/link-local, multicast, reserved/broadcast, unspecified); rejects
+  malformed/out-of-range ports; **pins** the connection to the validated IP so the
   address can't change between check and connect (closes the
   DNS-rebinding TOCTOU previously documented as a known limitation); and
   re-validates + re-pins on every redirect hop (manual redirects, capped
-  at 5). Built on stdlib `http.client` (was `urllib`) so the socket can
+  at 5; redirect bodies are discarded unread so a giant 30x body can't
+  exhaust memory). Built on stdlib `http.client` (was `urllib`) so the socket can
   be pinned. The blocking fetch now runs in a worker thread so it can't
   stall the MCP stdio event loop.
 - **Container egress hardening is now optional defense-in-depth, not

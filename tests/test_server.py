@@ -52,12 +52,20 @@ def test_validate_url_rejects_bad_schemes_and_structures(url: str, expected_frag
         "http://2130706433/",  # decimal form of 127.0.0.1
         "http://0x7f.0.0.1/",  # hex-octet form
         "http://0177.0.0.1/",  # octal-octet form
+        "http://127.0.0.1./",  # trailing-dot FQDN form
     ],
 )
 def test_validate_url_blocks_ip_literals(url: str) -> None:
     err = srv._validate_url(url)
     assert err is not None
     assert "ip-literal" in err.lower()
+
+
+@pytest.mark.parametrize("url", ["http://example.com:99999/", "http://example.com:abc/"])
+def test_validate_url_rejects_invalid_port(url: str) -> None:
+    err = srv._validate_url(url)
+    assert err is not None
+    assert "port" in err.lower()
 
 
 def test_validate_url_blocks_localhost_literal() -> None:
@@ -107,6 +115,11 @@ def test_is_ip_literal(host: str, is_literal: bool) -> None:
         ("fe80::1", True),
         ("fc00::1", True),
         ("::ffff:127.0.0.1", True),  # mapped loopback must be caught
+        ("224.0.0.1", True),  # multicast
+        ("240.0.0.1", True),  # reserved (240/4)
+        ("255.255.255.255", True),  # broadcast
+        ("0.0.0.0", True),  # unspecified  # noqa: S104
+        ("ff02::1", True),  # IPv6 multicast
         ("8.8.8.8", False),
         ("93.184.216.34", False),
         ("2606:2800:220:1:248:1893:25c8:1946", False),

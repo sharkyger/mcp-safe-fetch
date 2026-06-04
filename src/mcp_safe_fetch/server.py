@@ -76,7 +76,10 @@ _PRIVATE_HOSTNAMES = {"localhost"}
 # bare segments is an IP literal in disguise (e.g. ``2130706433`` or
 # ``0x7f.1`` == 127.0.0.1). ``ipaddress`` only parses canonical dotted
 # quads, so we reject these forms explicitly to deny direct-IP access.
-_NUMERIC_HOST_RE = re.compile(r"(?:0x[0-9a-fA-F]+|\d+)(?:\.(?:0x[0-9a-fA-F]+|\d+))*")
+# Trailing dot (``127.0.0.1.``) is allowed by some resolvers, so match
+# it too. (A resolved-to-private address is still caught downstream by
+# ``_resolve_and_validate``; this just rejects it cleanly up front.)
+_NUMERIC_HOST_RE = re.compile(r"(?:0x[0-9a-fA-F]+|\d+)(?:\.(?:0x[0-9a-fA-F]+|\d+))*\.?")
 
 
 class FetchError(Exception):
@@ -88,7 +91,13 @@ def _ip_is_private(addr: ipaddress.IPv4Address | ipaddress.IPv6Address) -> bool:
         # Defeat ::ffff:127.0.0.1 style mapped addresses by checking the
         # embedded v4 address against the private ranges too.
         addr = addr.ipv4_mapped
-    return any(addr in net for net in _PRIVATE_NETWORKS)
+    if any(addr in net for net in _PRIVATE_NETWORKS):
+        return True
+    # Belt for the long tail the explicit list does not enumerate:
+    # multicast (224.0.0.0/4, ff00::/8), reserved (240.0.0.0/4), and the
+    # unspecified/broadcast addresses. ``ipaddress`` classifies these
+    # the same across 3.10–3.12, so we lean on it rather than hand-listing.
+    return addr.is_multicast or addr.is_reserved or addr.is_unspecified
 
 
 def _is_ip_literal(host: str) -> bool:
@@ -119,6 +128,10 @@ def _validate_url(url: str) -> str | None:
         return "private and internal hosts are blocked"
     if _is_ip_literal(p.hostname):
         return "direct IP-literal URLs are not allowed; use a hostname"
+    try:
+        _ = p.port  # property raises ValueError on a malformed/out-of-range port
+    except ValueError:
+        return "invalid port in URL"
     return None
 
 
@@ -177,7 +190,11 @@ class _PinnedHTTPSConnection(http.client.HTTPSConnection):
         sock = socket.create_connection((self._pinned_ip, self.port), self.timeout)
         # server_hostname=self.host → SNI + cert hostname check use the
         # real hostname, not the pinned IP, so TLS verification holds.
-        self.sock = self._ssl_ctx.wrap_socket(sock, server_hostname=self.host)
+        try:
+            self.sock = self._ssl_ctx.wrap_socket(sock, server_hostname=self.host)
+        except BaseException:
+            sock.close()  # don't leak the raw socket if the TLS handshake fails
+            raise
 
 
 def _make_connection(scheme: str, host: str, port: int, pinned_ip: str) -> http.client.HTTPConnection:
@@ -217,7 +234,10 @@ def _fetch(url: str) -> bytes:
             resp = conn.getresponse()
             location = resp.getheader("Location")
             if resp.status in (301, 302, 303, 307, 308) and location:
-                resp.read()  # drain so the socket can close cleanly
+                # Don't read the redirect body — a fresh connection is
+                # made per hop, so closing it discards any unread bytes.
+                # (Reading unbounded here would let a malicious 30x with a
+                # giant body exhaust memory.)
                 conn.close()
                 current = urljoin(current, location)
                 continue
