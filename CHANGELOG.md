@@ -23,8 +23,24 @@ stable is announced. `v1.0` is reserved.
   server's SSRF contract, and the Dockerfile. Completes the tooling
   floor (ruff/mypy/bandit/pip-audit/CI/NOTICE were already present).
 
+- **End-user install guides** under `docs/install/` — a step-by-step,
+  non-technical macOS walkthrough (Docker Desktop → pull → Claude
+  Desktop config → restart → model rule) in English (`en.md`,
+  canonical), German (`de.md`), and French (`fr.md`). Translations carry
+  a drift stamp pointing back to `en.md`. Linked from the README via a
+  language table.
+
 ### Changed
 
+- **README right-sized.** `Supported: macOS only` banner at the very
+  top; the long internal "Why this exists" anecdote trimmed to a short
+  generic threat note; usage-before-install ordering; the GHCR pull is
+  now the documented install (the image is published, public, and
+  dogfooded); the minimal `docker run` is shown as already-safe with the
+  `--cap-drop/--read-only` flags presented as optional defense-in-depth
+  (the SSRF safety lives in the image); corrected `urllib` → stdlib
+  `http.client` and the SSRF description to match the resolve-then-pin
+  implementation.
 - **SSRF protection is now app-layer resolve-then-pin** (the safety
   travels with the image, not with `docker run` flags). The fetch path
   now: rejects IP-literal URLs in every form (canonical + obfuscated
