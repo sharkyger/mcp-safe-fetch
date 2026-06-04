@@ -22,6 +22,12 @@ on it. `mcp-safe-fetch` is the automatic version of the rule a careful
 operator applies by hand — it sanitizes the common injection vectors
 and envelopes every response so the model can tell data from commands.
 
+## System requirements
+
+- A Mac (macOS 12 or newer recommended).
+- Claude Desktop — if you do not have it, download it from [claude.ai/download](https://claude.ai/download).
+- Docker Desktop — we will install it in Step 1.
+
 ## What it does
 
 `mcp-safe-fetch` exposes a single tool over MCP stdio:
