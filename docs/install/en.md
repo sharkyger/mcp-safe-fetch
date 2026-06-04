@@ -16,7 +16,7 @@ download).
 
 ---
 
-## What you'll need
+## System requirements
 
 1. A Mac (macOS 12 or newer recommended).
 2. **Claude Desktop** — if you don't have it, download it from
@@ -60,8 +60,10 @@ the fetch tool isolated from the rest of your computer.
 
 ## Step 3 — Download the mcp-safe-fetch image
 
-1. Open the **Terminal** app (Spotlight: `⌘ Space`, type "Terminal",
-   press Return).
+1. Open the **Terminal** app. Two easy ways:
+   - **Spotlight:** press `⌘ Space`, type "Terminal", press Return.
+   - **Launchpad:** open Launchpad (Apps) from the Dock, type "Terminal"
+     in the search bar, and click it.
 2. Copy this line, paste it into Terminal, and press **Return**:
 
    ```bash
