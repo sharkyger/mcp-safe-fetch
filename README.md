@@ -11,7 +11,7 @@ Companion to [safe-fetch](https://github.com/sharkyger/safe-fetch)
 (same sanitizer, same wrap tag — but for Claude Code). This one is for
 **Claude Desktop** and any other MCP client.
 
-> **Pre-stable (`v0.1.0`).** The threat model is real and the
+> **Pre-stable (`v0.2.0`).** The threat model is real and the
 > mitigations are real, but the code is fresh — treat it as
 > alpha-quality and test it in your own context before relying on it.
 > `v1.0` is reserved for the first proven-stable release.
@@ -165,7 +165,7 @@ Step-by-step, screenshot-driven setup for non-technical users (macOS):
 
 ## Status
 
-- **Version:** `v0.1.0` — pre-stable. `v1.0` is reserved for the first
+- **Version:** `v0.2.0` — pre-stable. `v1.0` is reserved for the first
   reliably-tested stable. Don't put this on a critical-path workflow
   without testing it in your context first.
 - **Platform:** macOS only (Docker Desktop + Claude Desktop). Windows

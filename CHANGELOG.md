@@ -7,6 +7,15 @@ stable is announced. `v1.0` is reserved.
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-06-04
+
+### Theme
+
+**The honest first published release.** v0.1.0 was never tagged or
+released; `main` moved materially past it. v0.2.0 is the first GHCR
+image published, public, and dogfooded — and it hardens the SSRF
+boundary into the app code so a flag-free `docker run` is safe.
+
 ### Added
 
 - **GHCR publish workflow** restored (`.github/workflows/docker.yml`) —
