@@ -23,6 +23,28 @@ stable is announced. `v1.0` is reserved.
   server's SSRF contract, and the Dockerfile. Completes the tooling
   floor (ruff/mypy/bandit/pip-audit/CI/NOTICE were already present).
 
+### Changed
+
+- **SSRF protection is now app-layer resolve-then-pin** (the safety
+  travels with the image, not with `docker run` flags). The fetch path
+  now: rejects IP-literal URLs in every form (canonical + obfuscated
+  decimal/octal/hex/IPv4-mapped) and non-http(s) schemes; resolves the
+  hostname and refuses if **any** resolved address is private/internal
+  (RFC1918, loopback, link-local incl. `169.254.169.254`, CGNAT, IPv6
+  ULA/link-local); **pins** the connection to the validated IP so the
+  address can't change between check and connect (closes the
+  DNS-rebinding TOCTOU previously documented as a known limitation); and
+  re-validates + re-pins on every redirect hop (manual redirects, capped
+  at 5). Built on stdlib `http.client` (was `urllib`) so the socket can
+  be pinned. The blocking fetch now runs in a worker thread so it can't
+  stall the MCP stdio event loop.
+- **Container egress hardening is now optional defense-in-depth, not
+  required.** Reversal of the earlier "container-only egress" plan:
+  iptables egress needs `CAP_NET_ADMIN`, a runtime `--cap-add` that
+  can't be baked into the image — so a minimal `docker run` would have
+  needed a copy-pasted flag to be safe. App-layer is the flag-free-safe
+  primary instead. README + SCOPE updated to match.
+
 ## [0.1.0] - 2026-05-31
 
 ### Theme

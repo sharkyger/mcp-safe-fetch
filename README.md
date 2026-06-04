@@ -138,17 +138,19 @@ network-layer scanning if you want it.
 ### What it catches
 
 - Injection payloads hidden in HTML (the eight strip classes listed above)
-- Direct private/internal IP URLs (`http://127.0.0.1/`, `http://10.0.0.5/`)
-- DNS-rebinding via DNS resolution check
-- Redirect-based bypass via per-hop re-validation
+- IP-literal URLs of every form — `http://127.0.0.1/`, `http://10.0.0.5/`, and obfuscated decimal/octal/hex/IPv4-mapped variants (`http://2130706433/`) — all refused
+- Hostnames that resolve to private/internal ranges (RFC1918, loopback, link-local incl. cloud metadata `169.254.169.254`, CGNAT, IPv6 ULA/link-local)
+- DNS-rebinding — the connection is **pinned** to the validated IP, so the address can't change between the check and the connect
+- Redirect-based bypass — every hop is re-validated and re-pinned
 - Raw HTML reaching the model unwrapped — every response is enveloped
+
+> **The SSRF defense lives in the app code that ships in the image**, so even a flag-free `docker run -i --rm ghcr.io/sharkyger/mcp-safe-fetch` is protected. Container egress hardening (`--cap-drop=ALL --read-only`, a restricted network) is optional defense-in-depth, not required — it can't be baked into the image without a runtime `--cap-add=NET_ADMIN` the user would have to paste.
 
 ### What it does NOT catch
 
 - Injection inside an MCP response from a different MCP server (planned for v0.2.0 proxy mode)
 - Anything the user pastes into the chat directly
 - Tool calls the model decides to make based on the user's own prompt
-- A DNS-rebinding race in the TOCTOU window between resolution and fetch (acknowledged limitation; mitigation requires DNS pinning, planned for later hardening)
 - Adversarial payloads sophisticated enough to bypass the wrap-tag rule (the model is the last line; this tool raises the bar, not the ceiling)
 
 ### What it explicitly does not do

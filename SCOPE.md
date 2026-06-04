@@ -23,10 +23,16 @@ politely closed with a pointer to the appropriate cousin project.
    ourselves return.
 
 3. **Not extra process containment beyond Docker.** seccomp / AppArmor
-   / SELinux profiles are out of scope. Docker `--cap-drop=ALL
-   --read-only --network=bridge` is the recommended host config; if
-   that's not enough for your threat model, layer in additional
-   sandboxing at the runtime level.
+   / SELinux profiles are out of scope. The SSRF boundary lives in the
+   **app code that ships in the image** (resolve-then-pin: reject
+   IP-literals, validate every resolved address, pin the socket to the
+   validated IP, re-validate each redirect hop), so a flag-free `docker
+   run` is already safe. Container egress hardening (`--cap-drop=ALL
+   --read-only`, or a restricted network / `NET_ADMIN` iptables egress
+   policy) is **optional defense-in-depth** — useful but not required,
+   and deliberately not baked in because it would force a runtime
+   `--cap-add` the user must paste. If that's not enough for your threat
+   model, layer in additional sandboxing at the runtime level.
 
 4. **Not LLM-runtime detection.** We do not analyze the model's
    reasoning, output, or tool-call decisions. We only sanitize the
