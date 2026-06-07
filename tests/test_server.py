@@ -13,6 +13,7 @@ from unittest.mock import patch
 
 import pytest
 
+from mcp_safe_fetch import search
 from mcp_safe_fetch import server as srv
 
 # ── URL scheme + structure ──────────────────────────────────────────
@@ -191,3 +192,159 @@ def test_redirect_targets_are_rejected_by_validation(redirect_target: str) -> No
     # _fetch re-runs _validate_url on every hop; a malicious Location
     # therefore fails the same pre-flight as the original URL.
     assert srv._validate_url(redirect_target) is not None
+
+
+# ── search auth-header parsing (fail-closed, CRLF-safe) ──────────────
+
+
+class TestParseSearchHeader:
+    def test_none_and_blank_return_none(self) -> None:
+        assert srv._parse_search_header(None) is None
+        assert srv._parse_search_header("   ") is None
+
+    def test_valid_header_parsed(self) -> None:
+        assert srv._parse_search_header("Authorization: Bearer tok") == ("Authorization", "Bearer tok")
+
+    def test_value_may_contain_colons(self) -> None:
+        # Only the first ':' splits name from value.
+        assert srv._parse_search_header("X-Time: 12:30:00") == ("X-Time", "12:30:00")
+
+    def test_malformed_no_colon_raises(self) -> None:
+        with pytest.raises(srv.FetchError, match="malformed"):
+            srv._parse_search_header("no-colon-here")
+
+    def test_empty_name_raises(self) -> None:
+        with pytest.raises(srv.FetchError, match="malformed"):
+            srv._parse_search_header(": value-without-name")
+
+    def test_crlf_injection_dropped(self) -> None:
+        # An injected CRLF + second header line must be dropped entirely,
+        # so a crafted credential cannot smuggle extra request headers.
+        name, value = srv._parse_search_header("X-Key: abc\r\nX-Evil: 1")
+        assert name == "X-Key"
+        assert value == "abc"
+        assert "Evil" not in value
+
+
+# ── search credential handling in _fetch (cross-origin + cleartext) ──
+
+
+class _FakeResp:
+    """Minimal stand-in for http.client.HTTPResponse."""
+
+    def __init__(self, status: int, *, location: str | None = None, body: bytes = b"", reason: str = "OK") -> None:
+        self.status = status
+        self.reason = reason
+        self._location = location
+        self._body = body
+
+    def getheader(self, name: str) -> str | None:
+        return self._location if name == "Location" else None
+
+    def read(self, _n: int) -> bytes:
+        return self._body
+
+    def close(self) -> None:  # pragma: no cover - not exercised
+        pass
+
+
+class _FakeConn:
+    def __init__(self, resp: _FakeResp, sink: list[dict[str, str]]) -> None:
+        self._resp = resp
+        self._sink = sink
+
+    def request(self, _method: str, _target: str, headers: dict[str, str]) -> None:
+        self._sink.append(dict(headers))
+
+    def getresponse(self) -> _FakeResp:
+        return self._resp
+
+    def close(self) -> None:
+        pass
+
+
+def _patch_fetch(monkeypatch: pytest.MonkeyPatch, responses: list[_FakeResp]) -> list[dict[str, str]]:
+    """Patch _fetch's connection + DNS layers; return the list of header
+    dicts sent per hop (so tests can assert what reached the wire)."""
+    sent: list[dict[str, str]] = []
+    it = iter(responses)
+
+    def _fake_make_connection(_scheme: str, _host: str, _port: int, _pinned_ip: str) -> _FakeConn:
+        return _FakeConn(next(it), sent)
+
+    monkeypatch.setattr(srv, "_make_connection", _fake_make_connection)
+    monkeypatch.setattr(srv, "_resolve_and_validate", lambda _h, _p: "93.184.216.34")
+    return sent
+
+
+def test_fetch_without_credential_sends_no_auth(monkeypatch: pytest.MonkeyPatch) -> None:
+    sent = _patch_fetch(monkeypatch, [_FakeResp(200, body=b"ok")])
+    assert srv._fetch("https://good.example/") == b"ok"
+    assert sent[0]["User-Agent"].startswith("mcp-safe-fetch/")
+    assert "X-Token" not in sent[0]
+
+
+def test_fetch_sends_credential_on_original_origin(monkeypatch: pytest.MonkeyPatch) -> None:
+    sent = _patch_fetch(monkeypatch, [_FakeResp(200, body=b"ok")])
+    srv._fetch("https://good.example/s?q=x", auth_header=("X-Token", "secret"))
+    assert sent[0].get("X-Token") == "secret"
+
+
+def test_fetch_keeps_credential_on_same_origin_redirect(monkeypatch: pytest.MonkeyPatch) -> None:
+    sent = _patch_fetch(
+        monkeypatch,
+        [_FakeResp(302, location="https://good.example/other"), _FakeResp(200, body=b"ok")],
+    )
+    assert srv._fetch("https://good.example/s?q=x", auth_header=("X-Token", "secret")) == b"ok"
+    assert sent[0].get("X-Token") == "secret"
+    assert sent[1].get("X-Token") == "secret"
+
+
+def test_fetch_drops_credential_on_cross_origin_redirect(monkeypatch: pytest.MonkeyPatch) -> None:
+    sent = _patch_fetch(
+        monkeypatch,
+        [_FakeResp(302, location="https://evil.example/"), _FakeResp(200, body=b"ok")],
+    )
+    assert srv._fetch("https://good.example/s?q=x", auth_header=("X-Token", "secret")) == b"ok"
+    assert sent[0].get("X-Token") == "secret"  # original origin: sent
+    assert "X-Token" not in sent[1]  # cross-origin: dropped
+
+
+def test_fetch_refuses_credential_over_http(monkeypatch: pytest.MonkeyPatch) -> None:
+    # Cleartext refusal: a credential must never be sent over plain http.
+    monkeypatch.setattr(srv, "_resolve_and_validate", lambda _h, _p: "93.184.216.34")
+    monkeypatch.setattr(srv, "_make_connection", lambda *_a: pytest.fail("must not open a connection before refusing"))
+    with pytest.raises(srv.FetchError, match="cleartext"):
+        srv._fetch("http://good.example/s?q=x", auth_header=("X-Token", "secret"))
+
+
+# ── search tool handler dispatch ─────────────────────────────────────
+
+
+async def test_handle_search_unconfigured_fails_closed(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.delenv(search.ENV_URL, raising=False)
+    monkeypatch.delenv(search.ENV_HEADER, raising=False)
+    out = await srv._handle_search({"query": "rust"})
+    assert "no search backend configured" in out[0].text
+
+
+async def test_handle_search_missing_query() -> None:
+    out = await srv._handle_search({})
+    assert "missing or invalid 'query'" in out[0].text
+
+
+async def test_handle_search_rejects_control_char_query(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv(search.ENV_URL, "https://api.example/s?q={query}")
+    out = await srv._handle_search({"query": "evil\nLocation: x"})
+    assert "control" in out[0].text.lower()
+
+
+async def test_handle_search_happy_path_wraps_results(monkeypatch: pytest.MonkeyPatch) -> None:
+    monkeypatch.setenv(search.ENV_URL, "https://api.example/s?q={query}")
+    monkeypatch.delenv(search.ENV_HEADER, raising=False)
+    _patch_fetch(monkeypatch, [_FakeResp(200, body=b"<html>results</html>")])
+    out = await srv._handle_search({"query": "rust async"})
+    text = out[0].text
+    assert "<UNTRUSTED-WEB" in text
+    # the percent-encoded query is what reached the backend URL
+    assert "rust%20async" in text

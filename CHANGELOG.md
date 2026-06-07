@@ -7,6 +7,55 @@ stable is announced. `v1.0` is reserved.
 
 ## [Unreleased]
 
+## [0.3.0] - 2026-06-08
+
+### Theme
+
+**Web search, bring-your-own backend.** Adds a second MCP tool,
+`search`, that turns a query into a URL via an operator-configured
+template and runs it through the exact same hardened fetch + Layer-2
+sanitizer + `<UNTRUSTED-WEB>` envelope path as `fetch_url`. Search
+results are untrusted data, identical to a fetched page. Mirrors the
+search capability shipped in safe-fetch v0.3.0 for fleet parity.
+
+### Added
+
+- **`search` MCP tool.** Percent-encodes the query into a URL template
+  and fetches it with the same resolve-then-pin SSRF protection,
+  redirect re-validation, sanitizer, and envelope as `fetch_url`. No
+  search provider is bundled and there is no baked allowlist — the
+  operator supplies a URL template (and optional auth header) via
+  environment variables (`MCP_SAFE_FETCH_SEARCH_URL` /
+  `MCP_SAFE_FETCH_SEARCH_HEADER`); the tool fails closed with a clear
+  error when none is set. The `{query}` placeholder is pinned to the
+  path/query of the template (never the host/port/fragment), so the
+  query can never redirect the request to a different destination. The
+  optional auth header is sent as an HTTP request header, never
+  interpolated into the URL: it travels only over https (cleartext is
+  refused), is dropped on any cross-origin redirect, and is parsed
+  fail-closed with CR/LF stripped so it cannot inject extra request
+  headers. The query→URL validators are vendored byte-identical from
+  safe-fetch.
+- **`.github/dependabot.yml`** — weekly grouped updates for pip,
+  github-actions, and docker, so pinned versions don't silently rot.
+
+### Fixed
+
+- **`serverInfo.version` now reports the release version.** The MCP
+  handshake previously advertised the `mcp` SDK's own library version
+  (a cosmetic version-hygiene bug); the server version is now
+  single-sourced from the package `__version__`.
+
+### Changed
+
+- **README:** documents the `search` tool and its environment-variable
+  configuration, and adds a "Make safe-fetch the only open-web route"
+  section — in Claude Desktop the built-in `web_fetch`/search stay
+  reachable unless disabled, so enforcing safe-fetch as the *sole*
+  fetcher is a deliberate operator step (Claude Code does this
+  mechanically via hooks; Desktop has no hook layer, so docs are the
+  mitigation).
+
 ## [0.2.1] - 2026-06-04
 
 ### Theme
