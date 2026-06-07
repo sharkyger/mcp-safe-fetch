@@ -31,6 +31,16 @@ src/mcp_safe_fetch/sanitizer.py` (or equivalent) and re-attribute via
 the header comment. When timstarkk's upstream changes, evaluate
 whether to port through safe-fetch first or directly into this repo.
 
+Search query→URL validators
+---------------------------
+The search input validators in `src/mcp_safe_fetch/search.py`
+(`template_error`, `query_error`, `build_search_url`, `_has_control_chars`)
+are vendored byte-identical from safe-fetch's `src/safe_fetch/search.py`
+(MIT, Copyright (c) 2026 Sharky) so the fleet validates searches
+identically. Config loading is adapted to this project's container model
+(environment variables only, no host config file). Original safe-fetch
+search support has no third-party lineage.
+
 ---
 
 MIT License

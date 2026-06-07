@@ -1,0 +1,42 @@
+version: 2
+
+# Keeps the three dependency surfaces of this repo fresh so a pinned
+# version can't silently rot (the gap that previously let node20 age out
+# across the fleet). Grouped PRs keep the noise down; the freshness-hold
+# + CVE-scan discipline still applies before any bump is merged.
+updates:
+  # Python deps (mcp, beautifulsoup4, lxml — pinned in pyproject.toml).
+  - package-ecosystem: pip
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+    open-pull-requests-limit: 5
+    groups:
+      pip-minor:
+        update-types: ["minor", "patch"]
+
+  # GitHub Actions (SHA-pinned in ci.yml + docker.yml).
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+    open-pull-requests-limit: 5
+    groups:
+      github-actions:
+        patterns: ["*"]
+
+  # Base image (python:3.12-slim, digest-pinned in the Dockerfile).
+  - package-ecosystem: docker
+    directory: /
+    schedule:
+      interval: weekly
+      day: monday
+      time: "07:00"
+    open-pull-requests-limit: 5
+    groups:
+      docker:
+        patterns: ["*"]

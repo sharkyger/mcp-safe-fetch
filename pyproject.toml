@@ -4,8 +4,8 @@ build-backend = "setuptools.build_meta"
 
 [project]
 name = "mcp-safe-fetch"
-version = "0.2.1"
-description = "MCP server providing a Layer-2 sanitized fetch tool for Claude Desktop and any MCP client"
+version = "0.3.0"
+description = "MCP server providing Layer-2 sanitized fetch + search tools for Claude Desktop and any MCP client"
 readme = "README.md"
 license = { file = "LICENSE" }
 requires-python = ">=3.10"
