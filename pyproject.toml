@@ -33,11 +33,11 @@ dependencies = [
     # Dependabot will bump to 1.27.2 around 2026-06-12 when it ages
     # past the hold. See feedback-brew-formula-sha-source for the
     # broader fleet pattern of "admissible-not-latest" pins.
-    "mcp==1.27.1",
+    "mcp==1.27.2",
     # Vendored sanitizer requires bs4 + lxml. Pins match safe-fetch's
     # so the sanitizer behaves byte-identically across the fleet.
     # lxml 6.1.1 closes PYSEC-2026-87 (5.x has no back-port).
-    "beautifulsoup4==4.14.3",
+    "beautifulsoup4==4.15.0",
     "lxml==6.1.1",
 ]
 
