@@ -7,22 +7,7 @@ stable is announced. `v1.0` is reserved.
 
 ## [Unreleased]
 
-### Changed
-
-- Bumped `mcp` from 1.27.1 to 1.27.2 and `beautifulsoup4` from 4.14.3
-  to 4.15.0 (both CVE-clean and past the freshness hold). The Docker
-  image inherits both automatically via the single pin source below.
-- The Docker image now installs the package and its exact-pinned
-  dependencies from `pyproject.toml` (`pip install .`) instead of
-  duplicating the pins inline in the Dockerfile — one pin source,
-  already watched by Dependabot, so the image can no longer drift
-  from the manifest.
-- Bumped SHA-pinned GitHub Actions: `actions/checkout` v6.0.2 → v6.0.3;
-  `docker/setup-qemu-action` and `docker/setup-buildx-action` → v4.1.0,
-  `docker/login-action` → v4.2.0, `docker/metadata-action` → v6.1.0,
-  `docker/build-push-action` → v7.2.0 (node24-ready stables).
-
-## [0.3.0] - 2026-06-08
+## [0.3.0] - 2026-06-13
 
 ### Theme
 
@@ -70,6 +55,21 @@ search capability shipped in safe-fetch v0.3.0 for fleet parity.
   fetcher is a deliberate operator step (Claude Code does this
   mechanically via hooks; Desktop has no hook layer, so docs are the
   mitigation).
+- **Docker image base** moved from `python:3.12-slim` to
+  `python:3.14-slim` (digest-pinned); the full test suite passes on
+  3.14, and CI now also runs the 3.13 and 3.14 interpreters.
+- The Docker image installs the package and its exact-pinned
+  dependencies from `pyproject.toml` (`pip install .`) instead of
+  duplicating the pins inline in the Dockerfile — one pin source,
+  already watched by Dependabot, so the image can no longer drift
+  from the manifest.
+- Bumped `mcp` from 1.27.1 to 1.27.2 and `beautifulsoup4` from 4.14.3
+  to 4.15.0 (both CVE-clean and past the freshness hold); the image
+  inherits both via the single pin source.
+- Bumped SHA-pinned GitHub Actions: `actions/checkout` v6.0.2 → v6.0.3;
+  `docker/setup-qemu-action` and `docker/setup-buildx-action` → v4.1.0,
+  `docker/login-action` → v4.2.0, `docker/metadata-action` → v6.1.0,
+  `docker/build-push-action` → v7.2.0 (node24-ready stables).
 
 ## [0.2.1] - 2026-06-04
 
