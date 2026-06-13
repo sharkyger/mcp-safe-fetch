@@ -11,6 +11,9 @@ node_modules/
 .codereview/
 tests/
 *.md
+# README.md must reach the build context: pyproject.toml declares it as
+# the package readme and the image installs via `pip install .`.
+!README.md
 .gitignore
 .dockerignore
 .ruff_cache/
