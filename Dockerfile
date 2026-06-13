@@ -8,7 +8,7 @@
 # config should also pass ``--network=bridge --cap-drop=ALL --read-only``
 # for full hardening (documented in README).
 
-FROM python:3.12-slim@sha256:090ba77e2958f6af52a5341f788b50b032dd4ca28377d2893dcf1ecbdfdfe203
+FROM python:3.14-slim@sha256:d7a925f9eb9639a93e455b9f12c167569358818c0f62b51b88edbc8fcf34c421
 
 # lxml needs libxml2/libxslt at runtime. apt-get is cleared after install
 # so the resulting image carries no package manager artifacts.
