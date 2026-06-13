@@ -9,6 +9,9 @@ stable is announced. `v1.0` is reserved.
 
 ### Changed
 
+- Bumped `mcp` from 1.27.1 to 1.27.2 and `beautifulsoup4` from 4.14.3
+  to 4.15.0 (both CVE-clean and past the freshness hold). The Docker
+  image inherits both automatically via the single pin source below.
 - The Docker image now installs the package and its exact-pinned
   dependencies from `pyproject.toml` (`pip install .`) instead of
   duplicating the pins inline in the Dockerfile — one pin source,
