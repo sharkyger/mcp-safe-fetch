@@ -28,11 +28,9 @@ classifiers = [
     "Topic :: Software Development :: Libraries :: Python Modules",
 ]
 dependencies = [
-    # mcp 1.27.2 still inside the 14-day freshness hold (released
-    # 2026-05-29); pin to 1.27.1 (2026-05-08, past hold, CVE-clean).
-    # Dependabot will bump to 1.27.2 around 2026-06-12 when it ages
-    # past the hold. See feedback-brew-formula-sha-source for the
-    # broader fleet pattern of "admissible-not-latest" pins.
+    # mcp 1.27.2 (released 2026-05-29) is past the 14-day freshness
+    # hold and CVE-clean (OSV+NVD+GHSA, gated 2026-06-13) — the fleet
+    # pins "admissible-not-latest": bumps wait out the hold first.
     "mcp==1.27.2",
     # Vendored sanitizer requires bs4 + lxml. Pins match safe-fetch's
     # so the sanitizer behaves byte-identically across the fleet.
