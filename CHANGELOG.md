@@ -7,6 +7,18 @@ stable is announced. `v1.0` is reserved.
 
 ## [Unreleased]
 
+### Changed
+
+- The Docker image now installs the package and its exact-pinned
+  dependencies from `pyproject.toml` (`pip install .`) instead of
+  duplicating the pins inline in the Dockerfile — one pin source,
+  already watched by Dependabot, so the image can no longer drift
+  from the manifest.
+- Bumped SHA-pinned GitHub Actions: `actions/checkout` v6.0.2 → v6.0.3;
+  `docker/setup-qemu-action` and `docker/setup-buildx-action` → v4.1.0,
+  `docker/login-action` → v4.2.0, `docker/metadata-action` → v6.1.0,
+  `docker/build-push-action` → v7.2.0 (node24-ready stables).
+
 ## [0.3.0] - 2026-06-08
 
 ### Theme
