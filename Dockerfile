@@ -14,17 +14,17 @@ FROM python:3.12-slim@sha256:090ba77e2958f6af52a5341f788b50b032dd4ca28377d2893dc
 # so the resulting image carries no package manager artifacts.
 RUN apt-get update \
  && apt-get install -y --no-install-recommends libxml2 libxslt1.1 \
- && rm -rf /var/lib/apt/lists/* \
- # Exact-pin must stay in lockstep with pyproject.toml so the host
- # and in-container installs resolve to byte-identical parsed-tree
- # behavior. lxml 6.1.1 closes PYSEC-2026-87 (5.x has no back-port).
- # mcp 1.27.1 is the past-freshness-hold admissible pin (2026-05-31).
- && pip install --no-cache-dir 'mcp==1.27.1' 'beautifulsoup4==4.14.3' 'lxml==6.1.1'
+ && rm -rf /var/lib/apt/lists/*
 
 WORKDIR /app
 
-# Build context is the repo root.
-COPY src/mcp_safe_fetch /app/mcp_safe_fetch
+# Build context is the repo root. The package and its exact-pinned deps
+# install from pyproject.toml — the single pin source Dependabot's pip
+# ecosystem watches — so the image can never drift from the manifest
+# (pin rationale lives next to the pins in pyproject.toml).
+COPY pyproject.toml README.md LICENSE ./
+COPY src ./src
+RUN pip install --no-cache-dir .
 
 # Run as a non-root user. The host should additionally pass
 # --user nobody / --cap-drop=ALL / --read-only at run time, but baking
@@ -32,6 +32,6 @@ COPY src/mcp_safe_fetch /app/mcp_safe_fetch
 RUN useradd --system --no-create-home --shell /usr/sbin/nologin fetcher
 USER fetcher
 
-ENV PYTHONPATH=/app PYTHONUNBUFFERED=1
+ENV PYTHONUNBUFFERED=1
 
 ENTRYPOINT ["python3", "-m", "mcp_safe_fetch"]
