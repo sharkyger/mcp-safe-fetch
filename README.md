@@ -173,6 +173,38 @@ Credential safety, when `MCP_SAFE_FETCH_SEARCH_HEADER` is set:
 - It is parsed fail-closed with CR/LF stripped, so a crafted value
   can't smuggle extra request headers.
 
+### Example: Brave Search
+
+[Brave Search](https://brave.com/search/api/) is a natural fit because
+it authenticates with a **header** (`X-Subscription-Token`) rather than a
+key in the URL — so the key is sent inside the container and never
+reaches the `<UNTRUSTED-WEB>` envelope. Its free "Data for Search" tier
+allows 2,000 queries/month; create a key under **API Keys** at
+<https://api-dashboard.search.brave.com>.
+
+```json
+"env": {
+  "MCP_SAFE_FETCH_SEARCH_URL": "https://api.search.brave.com/res/v1/web/search?q={query}",
+  "MCP_SAFE_FETCH_SEARCH_HEADER": "X-Subscription-Token: YOUR_BRAVE_API_KEY"
+}
+```
+
+**macOS gotcha.** A GUI-launched Claude Desktop does not inherit your
+shell environment, so bare `-e VAR` passthrough finds nothing and search
+stays unconfigured. Put both values in a `0600` env file and pass
+`--env-file /path/to/brave.env` in the `args` instead:
+
+```json
+"args": [
+  "run", "-i", "--rm",
+  "--env-file", "/absolute/path/to/brave.env",
+  "ghcr.io/sharkyger/mcp-safe-fetch:latest"
+]
+```
+
+That keeps the key out of the Claude config entirely — it lives only in
+the `0600` file.
+
 ## Make safe-fetch the only open-web route
 
 Adding the tool makes safe-fetch the model's **preferred** fetcher — not

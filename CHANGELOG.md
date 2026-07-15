@@ -7,6 +7,15 @@ stable is announced. `v1.0` is reserved.
 
 ## [Unreleased]
 
+### Documentation
+
+- Added a worked **Brave Search** example to the search section of the
+  README: the exact `MCP_SAFE_FETCH_SEARCH_URL` / `_HEADER` values (key
+  as a placeholder), why Brave's header auth keeps the key out of the
+  `<UNTRUSTED-WEB>` envelope, and the macOS `--env-file` gotcha for
+  GUI-launched Claude Desktop (bare `-e VAR` passthrough finds nothing
+  when the app has no shell env to forward).
+
 ## [0.3.0] - 2026-06-13
 
 ### Theme
