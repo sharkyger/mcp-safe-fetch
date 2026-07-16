@@ -7,6 +7,17 @@ stable is announced. `v1.0` is reserved.
 
 ## [Unreleased]
 
+### Security
+
+- Bumped `mcp` 1.27.2 → **1.28.1** to clear **GHSA-vj7q-gjh5-988w**
+  (HIGH — MCP Python SDK WebSocket server transport lacks Host/Origin
+  validation). The advisory does not affect this server in practice (it
+  runs over stdio, not the WebSocket transport), but 1.28.1 is the clean
+  release and the pin should not sit on a flagged version. Supersedes
+  Dependabot #17, which proposed 1.28.0 — itself still vulnerable
+  (the fix landed in 1.28.1). Verified CVE-clean + past the freshness
+  hold via the fleet dependency gate before pinning.
+
 ## [0.3.0] - 2026-06-13
 
 ### Theme
