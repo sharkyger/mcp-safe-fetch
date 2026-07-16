@@ -178,9 +178,9 @@ Credential safety, when `MCP_SAFE_FETCH_SEARCH_HEADER` is set:
 [Brave Search](https://brave.com/search/api/) is a natural fit because
 it authenticates with a **header** (`X-Subscription-Token`) rather than a
 key in the URL — so the key is sent inside the container and never
-reaches the `<UNTRUSTED-WEB>` envelope. Its free "Data for Search" tier
-allows 2,000 queries/month; create a key under **API Keys** at
-<https://api-dashboard.search.brave.com>.
+reaches the `<UNTRUSTED-WEB>` envelope. It has a free "Data for Search"
+tier (see <https://brave.com/search/api/> for current limits); create a
+key under **API Keys** at <https://api-dashboard.search.brave.com>.
 
 ```json
 "env": {
