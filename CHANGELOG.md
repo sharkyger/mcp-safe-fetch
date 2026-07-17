@@ -15,6 +15,7 @@ stable is announced. `v1.0` is reserved.
   `<UNTRUSTED-WEB>` envelope, and the macOS `--env-file` gotcha for
   GUI-launched Claude Desktop (bare `-e VAR` passthrough finds nothing
   when the app has no shell env to forward).
+
 ### Security
 
 - Bumped `mcp` 1.27.2 → **1.28.1** to clear **GHSA-vj7q-gjh5-988w**
