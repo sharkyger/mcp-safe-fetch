@@ -38,7 +38,7 @@ dependencies = [
     # so the sanitizer behaves byte-identically across the fleet.
     # lxml 6.1.1 closes PYSEC-2026-87 (5.x has no back-port).
     "beautifulsoup4==4.15.0",
-    "lxml==6.1.1",
+    "lxml==6.1.2",
 ]
 
 [project.urls]
